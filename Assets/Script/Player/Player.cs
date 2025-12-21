@@ -9,14 +9,17 @@ public class Player : MonoBehaviour
 
     [Header("Basic Stats")]
     private float Horizontal;
-    public float extraSpeed = 9f;
     public float maxSpeed = 5f;
-    public float moveForce = 1f;
-    public float brakeStrength = 0.5f;
+    public float moveForce = 0.3f;
+    public float torque = 5f;
+    public float brakeStrength = 0.2f;
 
-    [SerializeField] public float jumpForce = 5f;
+    [SerializeField] public float jumpForce = 2f;
+    public float jumpTimer = 0f;
+    public float jumpDuration = 2f;
     [SerializeField] private LayerMask groundLayer;
-    public bool isGrounded;
+    public bool isGrounded; 
+    public bool canJump;
     void Start()
     {
     rb = GetComponent<Rigidbody>();
@@ -25,7 +28,15 @@ public class Player : MonoBehaviour
     {
        Horizontal = Input.GetAxis("Horizontal"); // Moves Sideways
 
-        if(Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if(!canJump)
+        {
+            jumpTimer -= Time.deltaTime;
+            if(jumpTimer <= 0f)
+            {
+                canJump = true;
+            }
+        }
+        if(Input.GetKeyDown(KeyCode.Space) && canJump)
         {
             Jump();
         }
@@ -47,30 +58,26 @@ public class Player : MonoBehaviour
     }
     public void Movement()
     {
-        rb.AddForce(
-            new Vector3(Horizontal * moveForce, 0f, 0f));
-        if(Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            Vector3 vel = rb.velocity;
 
-            vel.z *= brakeStrength;
+         rb.AddForce(
+             new Vector3(Horizontal * moveForce, 0f, 0f));
+         if(Input.GetKeyDown(KeyCode.DownArrow))
+         {
+             Vector3 vel = rb.velocity;
 
-            rb.velocity = vel;
-        }
-        /*if(Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            Vector3 vel = rb.velocity;
+             vel.z *= brakeStrength;
 
-            vel.z *= extraSpeed;
-
-            rb.velocity = vel;
-        }*/
+             rb.velocity = vel;
+         }
+        rb.AddTorque(Vector3.back * Horizontal * torque);
     }
     public void Jump()
     {
         rb.velocity = new Vector3(rb.velocity.x, jumpForce, rb.velocity.z);
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-        isGrounded = false;
+
+        canJump = false;
+        jumpTimer = jumpDuration;
     }
     private void OnCollisionEnter(Collision collision)
     {
