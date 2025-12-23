@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class SlowDownJump : MonoBehaviour
 {
+    public float slowDownStrength = 0f;
+
     private void OnCollisionEnter(Collision collision)
     {
         if(collision.collider.CompareTag("Player"))
@@ -12,7 +14,7 @@ public class SlowDownJump : MonoBehaviour
             if(rb != null)
             {
                 Vector3 vel = rb.velocity;
-                vel.y = Mathf.Lerp(vel.y, 0f, Time.deltaTime * 10f);
+                vel.y = Mathf.Lerp(vel.y, 0f, Time.deltaTime * slowDownStrength);
                 rb.velocity = vel;
                 Debug.Log("Slowww");
             }
